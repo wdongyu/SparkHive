@@ -3,22 +3,17 @@ package com.wdongyu.hive;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SQLContext;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.api.java.function.FilterFunction;
+import org.apache.spark.api.java.function.MapFunction;
+import org.apache.spark.sql.*;
+import org.apache.spark.sql.catalyst.encoders.RowEncoder;
 import org.apache.spark.sql.hive.HiveContext;
-import org.codehaus.janino.Java;
-import java.util.List;
+import scala.collection.Seq;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Logger;
+import static org.apache.spark.sql.functions.sum;
+import static org.apache.spark.sql.functions.when;
 
 public class SparkHive {
-
-    private static Logger logger = Logger.getLogger("SparkHive");
 
     public static String[] tableList = {"T_GX_JGXX", "T_KJ_NBKMKJ", "T_JL_JYLS", "T_KJ_DGDCFZMX", "T_GX_GYB", "T_KJ_DGDCFZ", "T_KH_DGKHXX", "T_KJ_ZZQKM"};
 
@@ -39,8 +34,10 @@ public class SparkHive {
 
             {"jrxkzh", "yhjgdm", "nbjgh", "yhjgmc", "kmbh", "kmmc", "kmjc", "kmlx", "qcjfye", "qcdfye", "jffse", "dffse", "qmjfye", "qmdfye", "bz", "kjrq", "bszq", "id"}};
 
+    public static long[] rowCount = {859, 1817, 2387, 13758, 26949, 140420, 785703, 22561642};
+
     // With ID
-    public static int[] columnCount ={16, 9, 43, 36, 26, 26, 48, 18};
+    public static int[] columnCount = {16, 9, 43, 36, 26, 26, 48, 18};
 
     public static String notNullClause(String op, int tableIndex) {
         int count = columnCount[tableIndex] - 1;
@@ -67,7 +64,7 @@ public class SparkHive {
         return result;
     }
 
-    static  SparkSession spark;
+    static SparkSession spark;
 
     public static void main(String[] args) {
 
@@ -80,16 +77,87 @@ public class SparkHive {
         // JavaRDD<Row> jgxx = notNullCheck(0);
 
         // 读取对公定期存款分户账
-        Dataset<Row> dfdcfz = notNullCheck(5).cache();
+        // Dataset<Row> dfdcfz = notNullCheck(5).cache();
 
         // 读取对公客户信息表
         // Dataset<Row> dgkhxx = notNullCheck(6);
 
         // 读取总账全科目表
         // JavaRDD<Row> zzqkm = notNullCheck(7);
-        Dataset<Row> zzqkm = spark.sql("select kmbh from " + tableList[7]).cache();
+        //Dataset<Row> zzqkm = spark.sql("select kmbh,bz,kjrq,bszq,nbjgh from " + tableList[7]);
 
-        System.out.println(dfdcfz.except(zzqkm).count());
+        // Existence Check
+        // System.out.println(dfdcfz.except(zzqkm).count());
+
+        // Statistical Verification
+//        Dataset<Row> zzqkm = spark.sql("select qcjfye,qcdfye,jffse,dffse,qmjfye,qmdfye from " + tableList[7]);
+//        Dataset<Row> sv = zzqkm.filter(new FilterFunction<Row>() {
+//            @Override
+//            public boolean call(Row row) {
+//                return row.getDouble(0) - row.getDouble(1) + row.getDouble(2) - row.getDouble(3)
+//                        != row.getDouble(4) - row.getDouble(5);
+//            }
+//        });
+//        System.out.println(sv.count());
+
+        // 账户本期月末余额=上期账户月末余额-本期借方发生额+本期贷方发生额
+//        Dataset<Row> dgdcfzmx = spark.sql("select jyje,dqckzh,bz,cjrq,jyjdbz from " + tableList[3]);
+//        Dataset<Row> d1 = dgdcfzmx.map(new MapFunction<Row, Row>() {
+//                                    @Override
+//                                    public Row call(Row row) throws Exception {
+//                                        int len = row.length();
+//                                        Object[] obj = new Object[len - 1];
+//                                        obj[0] = row.getString(len - 1).equalsIgnoreCase("借") ? -row.getDouble(0) : row.getDouble(0);
+//                                        for (int i = 1; i < len - 1; i++) {
+//                                            obj[i] = row.get(i);
+//                                        }
+//                                        Row result = RowFactory.create(obj);
+//                                        return result;
+//                                    }
+//                                }, RowEncoder.apply(dgdcfzmx.select("jyje","dqckzh", "bz", "cjrq").schema()))
+//                                .groupBy("dqckzh", "bz", "cjrq")
+//                                .sum("jyje");
+//        // d1.where(d1.col("dqckzh").$eq$eq$eq("8c3cb63a3f0049e8af5c95d16c1b6c09")).show();
+//        System.out.println(d1.count());
+
+
+        // 对公定期存款分户账中存款余额之和
+        Dataset<Row> dgdcfz = spark.sql("select nbjgh,mxkmbh,bz,ckye from " + tableList[5]);
+        Dataset<Row> d2 = dgdcfz.groupBy("nbjgh", "mxkmbh", "bz").sum("ckye");
+        //d2.show();
+//        System.out.println(d2.count());
+
+        // 总账科目中期末贷方余额之和
+        Dataset<Row> zzqkm = spark.sql("select nbjgh,kmbh,bz,qmdfye from " + tableList[7]).cache();
+        Dataset<Row> z2 = zzqkm.groupBy("nbjgh", "kmbh", "bz").sum("qmdfye");
+        //z2.show();
+//        System.out.println(z2.count());
+
+        Dataset<Row> r = d2.join(z2).where(d2.col("nbjgh").$eq$eq$eq(z2.col("nbjgh")))
+                .where(d2.col("mxkmbh").$eq$eq$eq(z2.col("kmbh")))
+                .where(d2.col("bz").$eq$eq$eq(z2.col("bz")))
+                .filter(new FilterFunction<Row>() {
+                    @Override
+                    public boolean call(Row row) throws Exception {
+                        return !row.get(3).equals(row.get(7));
+                    }
+                });
+        // r.show();
+        System.out.println(r.count());
+
+
+        // Uniqueness Check
+//        Dataset<Row> zzqkm = spark.sql("select kmbh,bz,kjrq,bszq,nbjgh from " + tableList[7]);
+//        Dataset<Row> c = zzqkm.groupBy("kmbh", "bz", "kjrq" , "bszq", "nbjgh").count()
+//                            .filter(new FilterFunction<Row>() {
+//                                @Override
+//                                public boolean call(Row row) throws Exception {
+//                                    return row.getLong(5) > 1;
+//                                }
+//                            });
+//        c.show();
+        //System.out.println(c.count());
+        //System.out.println(zzqkm.distinct().count());
 
         spark.stop();
         spark.close();
