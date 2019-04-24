@@ -70,6 +70,8 @@ public class SparkHive {
 
         spark = SparkSession.builder()
                 .appName("SparkHive")
+                .config("spark.sql.warehouse.dir", "/user/hive/warehouse")
+                .config("hive.metastore.uris", "thrift://172.16.1.137:31070")
                 .enableHiveSupport()
                 .getOrCreate();
 
@@ -122,41 +124,41 @@ public class SparkHive {
 
 
         // 对公定期存款分户账中存款余额之和
-        Dataset<Row> dgdcfz = spark.sql("select nbjgh,mxkmbh,bz,ckye from " + tableList[5]);
-        Dataset<Row> d2 = dgdcfz.groupBy("nbjgh", "mxkmbh", "bz").sum("ckye");
-        //d2.show();
-//        System.out.println(d2.count());
-
-        // 总账科目中期末贷方余额之和
-        Dataset<Row> zzqkm = spark.sql("select nbjgh,kmbh,bz,qmdfye from " + tableList[7]).cache();
-        Dataset<Row> z2 = zzqkm.groupBy("nbjgh", "kmbh", "bz").sum("qmdfye");
-        //z2.show();
-//        System.out.println(z2.count());
-
-        Dataset<Row> r = d2.join(z2).where(d2.col("nbjgh").$eq$eq$eq(z2.col("nbjgh")))
-                .where(d2.col("mxkmbh").$eq$eq$eq(z2.col("kmbh")))
-                .where(d2.col("bz").$eq$eq$eq(z2.col("bz")))
-                .filter(new FilterFunction<Row>() {
-                    @Override
-                    public boolean call(Row row) throws Exception {
-                        return !row.get(3).equals(row.get(7));
-                    }
-                });
-        // r.show();
-        System.out.println(r.count());
+//        Dataset<Row> dgdcfz = spark.sql("select nbjgh,mxkmbh,bz,ckye from " + tableList[5]);
+//        Dataset<Row> d2 = dgdcfz.groupBy("nbjgh", "mxkmbh", "bz").sum("ckye");
+//        //d2.show();
+//        //System.out.println(d2.count());
+//
+//        // 总账科目中期末贷方余额之和
+//        Dataset<Row> zzqkm = spark.sql("select nbjgh,kmbh,bz,qmdfye from " + tableList[7]).cache();
+//        Dataset<Row> z2 = zzqkm.groupBy("nbjgh", "kmbh", "bz").sum("qmdfye");
+//        //z2.show();
+//        //System.out.println(z2.count());
+//
+//        Dataset<Row> r = d2.join(z2).where(d2.col("nbjgh").$eq$eq$eq(z2.col("nbjgh")))
+//                .where(d2.col("mxkmbh").$eq$eq$eq(z2.col("kmbh")))
+//                .where(d2.col("bz").$eq$eq$eq(z2.col("bz")))
+//                .filter(new FilterFunction<Row>() {
+//                    @Override
+//                    public boolean call(Row row) throws Exception {
+//                        return !row.get(3).equals(row.get(7));
+//                    }
+//                });
+//        // r.show();
+//        System.out.println(r.count());
 
 
         // Uniqueness Check
-//        Dataset<Row> zzqkm = spark.sql("select kmbh,bz,kjrq,bszq,nbjgh from " + tableList[7]);
-//        Dataset<Row> c = zzqkm.groupBy("kmbh", "bz", "kjrq" , "bszq", "nbjgh").count()
-//                            .filter(new FilterFunction<Row>() {
-//                                @Override
-//                                public boolean call(Row row) throws Exception {
-//                                    return row.getLong(5) > 1;
-//                                }
-//                            });
-//        c.show();
-        //System.out.println(c.count());
+        Dataset<Row> zzqkm = spark.sql("select kmbh,bz,kjrq,bszq,nbjgh from " + tableList[7]);
+        Dataset<Row> c = zzqkm.groupBy("kmbh", "bz", "kjrq" , "bszq", "nbjgh").count()
+                            .filter(new FilterFunction<Row>() {
+                                @Override
+                                public boolean call(Row row) throws Exception {
+                                    return row.getLong(5) >= 1;
+                                }
+                            });
+        //c.show();
+        System.out.println(c.count());
         //System.out.println(zzqkm.distinct().count());
 
         spark.stop();

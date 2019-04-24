@@ -17,6 +17,48 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <!--<plugin>-->
+                <!--<groupId>com.google.cloud.tools</groupId>-->
+                <!--<artifactId>jib-maven-plugin</artifactId>-->
+                <!--<version>1.1.1</version>-->
+                <!--<configuration>-->
+                    <!--<from>-->
+                        <!--<image>registry.njuics.cn/wdongyu/spark:2.4.0</image>-->
+                    <!--</from>-->
+                    <!--<to>-->
+                        <!--<image>registry.njuics.cn/wdongyu/spark-hive:1.0</image>-->
+                    <!--</to>-->
+                    <!--<container>-->
+                        <!--<workingDirectory>/app</workingDirectory>-->
+                        <!--<entrypoint>INHERIT</entrypoint>-->
+                    <!--</container>-->
+                <!--</configuration>-->
+                <!--&lt;!&ndash;<executions>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<execution>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<phase>package</phase>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<goals>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<goal>build</goal>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</goals>&ndash;&gt;-->
+                    <!--&lt;!&ndash;</execution>&ndash;&gt;-->
+                <!--&lt;!&ndash;</executions>&ndash;&gt;-->
+            <!--</plugin>-->
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-resources-plugin</artifactId>-->
+                <!--<version>3.1.0</version>-->
+                <!--<configuration>-->
+                    <!--<outputDirectory>${project.basedir}/src/main/jib/opt/spark/jars/</outputDirectory>-->
+                    <!--<resources>-->
+                        <!--<resource>-->
+                            <!--<directory>${project.basedir}/target/</directory>-->
+                            <!--<includes>-->
+                                <!--<include>SparkHive-1.0-SNAPSHOT.jar</include>-->
+                            <!--</includes>-->
+                            <!--<filtering>true</filtering>-->
+                        <!--</resource>-->
+                    <!--</resources>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 
