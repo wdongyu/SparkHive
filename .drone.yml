@@ -8,7 +8,8 @@ steps:
   - name: share-jars
     path: /jars
   commands:
-  - cp ./target/SparkHive-1.0-SNAPSHOT.jar /jars
+  - ls
+#  - cp ./target/SparkHive-1.0-SNAPSHOT.jar /jars
 
 #  spark-submit:
 #    image: registry.njuics.cn/wdongyu/spark:2.4.0
