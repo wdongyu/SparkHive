@@ -1,11 +1,14 @@
-pipeline:
-  scp:
-    image: node
-    volumes:
-    - name: share-jars
-      path: /jars
-    command:
-    - cp target/SparkHive-1.0-SNAPSHOT.jar /jars
+kind: pipeline
+name: default
+
+step:
+- name: scp
+  image: node
+  volumes:
+  - name: share-jars
+    path: /jars
+  command:
+  - cp target/SparkHive-1.0-SNAPSHOT.jar /jars
 
 #  spark-submit:
 #    image: registry.njuics.cn/wdongyu/spark:2.4.0
