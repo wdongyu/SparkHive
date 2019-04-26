@@ -1,0 +1,7 @@
+pipeline:
+  scp:
+    image: appleboy/drone-scp
+    settings:
+      host: 172.16.1.137
+      target: /jars
+      source: target/SparkHive-1.0-SNAPSHOT.jar
