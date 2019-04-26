@@ -2,7 +2,9 @@ pipeline:
   scp:
     image: appleboy/drone-scp
     settings:
-      # host: 210.28.133.11
-      # port: 21590
+      host: 210.28.133.11
+      username: root
+      password: njU163803
+      port: 21590
       target: /jars
       source: target/SparkHive-1.0-SNAPSHOT.jar
