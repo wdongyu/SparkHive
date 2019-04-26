@@ -16,9 +16,9 @@ steps:
   - name: share-jars
     path: /jars
   commands:
-  - ls /opt/
-#  - cd /opt/spark
-#  - ./bin/spark-submit --master k8s://https://172.16.1.137:6443 --deploy-mode cluster --name spark-hive --class com.wdongyu.hive.SparkHive --conf spark.executor.instances=5 --conf spark.kubernetes.container.image.pullPolicy=Always --conf spark.kubernetes.container.image=registry.njuics.cn/wdongyu/spark:2.4.0 --conf spark.kubernetes.namespace=kerong --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark local:///jars/SparkHive-1.0-SNAPSHOT.jar
+  - cd /opt/spark
+  - pwd
+  - ./bin/spark-submit --master k8s://https://172.16.1.137:6443 --deploy-mode cluster --name spark-hive --class com.wdongyu.hive.SparkHive --conf spark.executor.instances=5 --conf spark.kubernetes.container.image.pullPolicy=Always --conf spark.kubernetes.container.image=registry.njuics.cn/wdongyu/spark:2.4.0 --conf spark.kubernetes.namespace=kerong --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark local:///jars/SparkHive-1.0-SNAPSHOT.jar
 
 volumes:
 - name: share-jars
