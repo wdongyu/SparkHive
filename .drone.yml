@@ -1,13 +1,13 @@
 kind: pipeline
 name: default
 
-step:
+steps:
 - name: scp
   image: node
   volumes:
   - name: share-jars
     path: /jars
-  command:
+  commands:
   - cp target/SparkHive-1.0-SNAPSHOT.jar /jars
 
 #  spark-submit:
