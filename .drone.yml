@@ -1,5 +1,4 @@
 pipeline:
-
   scp:
     image: node
     volumes:
