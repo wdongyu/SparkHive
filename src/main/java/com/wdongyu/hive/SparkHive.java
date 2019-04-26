@@ -157,8 +157,8 @@ public class SparkHive {
                                     return row.getLong(5) >= 1;
                                 }
                             });
-        //c.show();
-        System.out.println(c.count());
+        c.show();
+        //System.out.println(c.count());
         //System.out.println(zzqkm.distinct().count());
 
         spark.stop();
