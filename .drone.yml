@@ -12,6 +12,9 @@ steps:
 
 - name: submit-job
   image: registry.njuics.cn/drone/kubectl
+  volumes:
+  - name: share-jars
+    path: /jars
   commands:
   - rm -rf /root/.kube && cp -r .kube /root
   - kubectl delete -f job.yaml -n kerong || true
