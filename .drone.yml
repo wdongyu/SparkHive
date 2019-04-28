@@ -15,6 +15,7 @@ steps:
   commands:
   - rm -rf /root/.kube && cp -r .kube /root
   - kubectl delete -f job.yaml -n kerong || true
+  - kubectl delete pod $(kubectl get pods -n kerong --selector=driver-pod=spark-hive --output=jsonpath='{.items[*].metadata.name}') -n kerong
   - kubectl apply -f job.yaml -n kerong
   - sleep 5
   - kubectl logs $(kubectl get pods -n kerong --selector=driver-pod=spark-hive --output=jsonpath='{.items[*].metadata.name}') -n kerong
