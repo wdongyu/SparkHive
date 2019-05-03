@@ -72,6 +72,7 @@ public class SparkHive {
                 .appName("SparkHive")
                 .config("spark.sql.warehouse.dir", "/user/hive/warehouse")
                 .config("hive.metastore.uris", "thrift://172.16.1.137:31070")
+                //.config("hive.metastore.uris", "thrift://hadoop-spark-master:9083")
                 .enableHiveSupport()
                 .getOrCreate();
 
