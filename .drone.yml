@@ -8,7 +8,7 @@ pipeline:
     - cp ./target/SparkHive-1.0-SNAPSHOT.jar /jars
     - rm -rf /root/.kube && cp -r .kube /root
     - kubectl delete -f job.yaml -n aff || true
-    - kubectl delete pod $(kubectl get pods -n aff --selector=driver-pod=spark-hive --output=jsonpath='{.items[*].metadata.name}') -n aff
+    - kubectl delete pod $(kubectl get pods -n aff --selector=driver-pod=spark-hive --output=jsonpath='{.items[*].metadata.name}') -n aff || true
     - kubectl apply -f job.yaml -n aff
     - sleep 10
     - kubectl logs -f $(kubectl get pods -n aff --selector=driver-pod=spark-hive --output=jsonpath='{.items[*].metadata.name}') -n aff
