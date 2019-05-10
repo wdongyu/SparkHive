@@ -4,6 +4,8 @@ pipeline:
 #    volumes:
 #    - name: share-jars
 #      path: /jars
+    volumes:
+      - /data/share-jars:/jars
     commands:
       - cp ./target/SparkHive-1.0-SNAPSHOT.jar /jars
       - rm -rf /root/.kube && cp -r .kube /root
