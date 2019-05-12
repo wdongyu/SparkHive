@@ -2,7 +2,7 @@ kind: pipeline
 name: default
 
 steps:
-- name: submit:
+- name: submit
   image: registry.njuics.cn/drone/kubectl
   volumes:
   - name: share-jars
