@@ -1,11 +1,11 @@
 pipeline:
   submit:
     image: registry.njuics.cn/drone/kubectl
-#    volumes:
-#    - name: share-jars
-#      path: /jars
     volumes:
-      - /data/share-jars:/jars
+    - name: share-jars
+      path: /jars
+#    volumes:
+#      - /data/share-jars:/jars
     commands:
       - cp ./target/SparkHive-1.0-SNAPSHOT.jar /jars
       - rm -rf /root/.kube && cp -r .kube /root
@@ -15,7 +15,7 @@ pipeline:
       - sleep 10
       - kubectl logs -f $(kubectl get pods -n aff --selector=driver-pod=spark-hive --output=jsonpath='{.items[*].metadata.name}') -n aff
 
-#volumes:
-#- name: share-jars
-#  host:
-#      path: /jars
+volumes:
+- name: share-jars
+  host:
+      path: /data/share-jars
