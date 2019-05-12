@@ -125,10 +125,10 @@ public class SparkHive {
 
 
         // 对公定期存款分户账中存款余额之和
-//        Dataset<Row> dgdcfz = spark.sql("select nbjgh,mxkmbh,bz,ckye from " + tableList[5]);
-//        Dataset<Row> d2 = dgdcfz.groupBy("nbjgh", "mxkmbh", "bz").sum("ckye");
-//        //d2.show();
-//        //System.out.println(d2.count());
+        Dataset<Row> dgdcfz = spark.sql("select nbjgh,mxkmbh,bz,ckye from " + tableList[5]);
+        Dataset<Row> d2 = dgdcfz.groupBy("nbjgh", "mxkmbh", "bz").sum("ckye");
+        d2.show();
+        //System.out.println(d2.count());
 //
 //        // 总账科目中期末贷方余额之和
 //        Dataset<Row> zzqkm = spark.sql("select nbjgh,kmbh,bz,qmdfye from " + tableList[7]).cache();
@@ -150,15 +150,15 @@ public class SparkHive {
 
 
         // Uniqueness Check
-        Dataset<Row> zzqkm = spark.sql("select kmbh,bz,kjrq,bszq,nbjgh from " + tableList[7]);
-        Dataset<Row> c = zzqkm.groupBy("kmbh", "bz", "kjrq" , "bszq", "nbjgh").count()
-                            .filter(new FilterFunction<Row>() {
-                                @Override
-                                public boolean call(Row row) throws Exception {
-                                    return row.getLong(5) >= 1;
-                                }
-                            });
-        c.show();
+//        Dataset<Row> zzqkm = spark.sql("select kmbh,bz,kjrq,bszq,nbjgh from " + tableList[7]);
+//        Dataset<Row> c = zzqkm.groupBy("kmbh", "bz", "kjrq" , "bszq", "nbjgh").count()
+//                            .filter(new FilterFunction<Row>() {
+//                                @Override
+//                                public boolean call(Row row) throws Exception {
+//                                    return row.getLong(5) >= 1;
+//                                }
+//                            });
+//        c.show();
         //System.out.println(c.count());
         //System.out.println(zzqkm.distinct().count());
 
