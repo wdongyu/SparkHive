@@ -125,15 +125,15 @@ public class SparkHive {
 
 
         // 对公定期存款分户账中存款余额之和
-        // Dataset<Row> dgdcfz = spark.sql("select nbjgh,mxkmbh,bz,ckye from " + tableList[5]);
-        // Dataset<Row> d2 = dgdcfz.groupBy("nbjgh", "mxkmbh", "bz").sum("ckye");
-        // d2.show();
+        Dataset<Row> dgdcfz = spark.sql("select nbjgh,mxkmbh,bz,ckye from " + tableList[5]);
+        Dataset<Row> d2 = dgdcfz.groupBy("nbjgh", "mxkmbh", "bz").sum("ckye");
+        d2.show();
         //System.out.println(d2.count());
 //
        // 总账科目中期末贷方余额之和
-       Dataset<Row> zzqkm = spark.sql("select nbjgh,kmbh,bz,qmdfye from " + tableList[7]).cache();
-       Dataset<Row> z2 = zzqkm.groupBy("nbjgh", "kmbh", "bz").sum("qmdfye");
-       z2.show();
+    //    Dataset<Row> zzqkm = spark.sql("select nbjgh,kmbh,bz,qmdfye from " + tableList[7]).cache();
+    //    Dataset<Row> z2 = zzqkm.groupBy("nbjgh", "kmbh", "bz").sum("qmdfye");
+    //    z2.show();
        //System.out.println(z2.count());
 //
 //        Dataset<Row> r = d2.join(z2).where(d2.col("nbjgh").$eq$eq$eq(z2.col("nbjgh")))
