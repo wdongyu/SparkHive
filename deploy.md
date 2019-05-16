@@ -1,86 +1,71 @@
-## *Spark-submit Using Kubernetes*
+## *Submit MR and Spark jobs on clusters*
 
-1. 打包**Spark**基础镜像
+* Prerequisites (已完成)
+	
+	在kubenernetes集群中，手动或自动(使用Operator)地完成Hadoop/Spark集群的创建。已创建完成大小两个规模的Hadoop/Spark集群(包含了Hadoop、Spark、Hive、Sqoop工作环境)，其中小规模集群用于存放小规模数据集及代码调试，大规模集群用于操作完整数据集。
+	
+	通过远端提供的[vscode编辑器](http://210.28.133.11:21835/)，在其中编写对应的业务代码，然后在terminal中使用**mvn package**命令生成jar文件，最后提交任务。
+	
+1.	提交MR任务
 
-    到[Spark官网](https://spark.apache.org/downloads.html)中去下载编译好的压缩包，版本应选择在2.3.0之上。
-    
-    ![Spark Download](images/spark_download.png)
-    
-    将压缩包解压：
-    
-	> tar -zxvf spark-2.4.1-bin-hadoop2.7.tgz
+	1.1	本地小规模集群提交
 	
-	进入主目录打包**Spark**基础镜像，然后上传到镜像仓库中：
+	默认情况下，\$HADOOP\_CONF\_DIR指向\$HADOOP_HOME/etc/hadoop
 	
-	> docker build -t registry.njuics.cn/wdongyu/spark:2.4.0 -f kubernetes/dockerfiles/spark/Dockerfile .
+	使用hdfs命令，来查看当前集群的节点状态：
+		
+	> hdfs dfsadmin -report
 	
-	> docker push registry.njuics.cn/wdongyu/spark:2.4.0
+	![local-status](manifest/images/local-status.png)
 	
-	```
-	注意：将上述命令中的仓库地址修改为自己的仓库地址;
-		 docker build命令最后的.表示当前目录;
-	```
+	将数据导入到集群中，然后使用hadoop命令提交任务：
 	
+	> hadoop jar path\_to\_jar/xxx.jar MainClass arg1 arg2
 	
-2.	编写程序代码并打包程序镜像
+	![local-wordcount](manifest/images/local-wordcount.png)
+	
+	1.2 远端大规模集群提交
+		
+	将\$HADOOP\_CONF\_DIR指向远端集群的配置：
+	
+	> export HADOOP\_CONF_DIR=$HADOOP\_HOME/etc/remote\_hadoop
+	
+	使用hdfs命令，来查看远端集群的节点状态：
+		
+	> hdfs dfsadmin -report
+	
+	![remote-status](manifest/images/remote-status.png)
+	
+	集群中已有完整的数据集，直接使用相同的hadoop命令提交任务即可：
+	
+	> hadoop jar path\_to\_jar/xxx.jar MainClass arg1 arg2
+	
+	![remote-wordcount](manifest/images/remote-wordcount.png)
+	
+2. 提交Spark任务
 
-	使用IDE完成程序代码的编写，使用**mvn package**命令生成jar文件，然后在代码主目录下添加如下内容到Dockerfile文件中：
-	
-	```
-	## 修改为前一步骤中上传的仓库地址
-	FROM registry.njuics.cn/wdongyu/spark:2.4.0
-
-	RUN mkdir -p /opt/spark/jars
-
-	COPY target/SparkHive-1.0-SNAPSHOT.jar /opt/spark/jars
-	```
-	
-	在主目录下打包程序镜像并上传镜像：
-	
-	> docker build -t registry.njuics.cn/wdongyu/spark-hive:1.0 .
-	
-	> docker push registry.njuics.cn/wdongyu/spark-hive:1.0
-	
-3.	登录到kubernetes集群中，并使用spark-submit提交任务
-
-	使用ssh命令进行远程登录：
-	
-	> ssh root@210.28.133.11 -p 21590
-	
-	进入到spark主目录下:
-	
-	> cd spark
+	1.1	本地小规模集群提交
 	
 	使用spark-submit命令提交任务：
 	
 	```
-	## 注意对主函数名称、镜像仓库、jar文件名称进行修改
+	## 注意对jar文件名称进行修改
 	
-	./bin/spark-submit \
-	--master k8s://https://172.16.1.137:6443 \
-	--deploy-mode cluster \
-	--name spark-hive \
-	--class com.wdongyu.hive.SparkHive \
-	--conf spark.executor.instances=5 \
-	--conf spark.kubernetes.container.image.pullPolicy=Always \
-	--conf spark.kubernetes.container.image=registry.njuics.cn/wdongyu/spark-hive:1.0 \
-	--conf spark.kubernetes.namespace=kerong \
-	--conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-	local:///opt/spark/jars/SparkHive-1.0-SNAPSHOT.jar
+	spark-submit \
+	--master spark://test-master:7077 \
+	--conf spark.driver.extraJavaOptions="-Dfile.encoding=utf-8" \
+	--conf spark.executor.extraJavaOptions="-Dfile.encoding=utf-8" \
+	SparkHive/target/SparkHive-1.0-SNAPSHOT.jar
 	```
 	
-	任务提交之后，可以打开新的终端窗口执行同样的ssh登录操作，使用kubectl命令查看当前任务状态：
+	![local-spark](manifest/images/local-spark.png)
 	
-	> kubectl get pod -n kerong
+	1.2 远端大规模集群提交
 	
-	![running-pod](images/running-pod.png)
+	进入代码根目录下，使用sparkctl submit命令提交任务：
 	
-	进一步查看作业的输出内容：
+	> sparkctl submit
 	
-	> kubectl logs -f spark-hive-1556017364631-driver -n kerong
+	![remote-spark-1](manifest/images/remote-spark-1.png)
 	
-	![result](images/result.png)
-	
-	spark-submit端输出结果：
-	
-	![submit-succeeded](images/submit-succeeded.png)
+	![remote-spark-2](manifest/images/remote-spark-2.png)
