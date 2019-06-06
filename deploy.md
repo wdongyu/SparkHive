@@ -64,7 +64,11 @@
 	
 	1.2 远端大规模集群提交
 	
-	进入代码根目录下，使用sparkctl submit命令提交任务：
+	修改metastore，连接到远端：
+	
+	![remote-uri](manifest/images/remote-uri.png)
+	
+	返回代码根目录下，**mvn package**打包生成jar，然后使用sparkctl submit命令提交任务：
 	
 	> sparkctl submit
 	
